@@ -251,7 +251,6 @@ class AliTrans():
                                  'BeginTime': 词['BeginTime'],
                                  'ChannelId': 词['ChannelId']})
             字幕 = 将本句字幕添加到列表(行)
-        print(字幕列表)
 
         return srt.compose(字幕列表, reindex=True, start_index=1, strict=True)
     
