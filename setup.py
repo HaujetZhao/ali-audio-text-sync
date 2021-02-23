@@ -29,7 +29,7 @@ setup(
         ],
     
     # 含有 py 文件的文件夹（源码文件夹）
-    packages=['ali_audio_to_srt'
+    packages=['ali_audio_text_sync'
         ],
     
     # 每个本地包中需要包含的另外的文件
@@ -40,10 +40,9 @@ setup(
     # 安装后，命令行使用的入口
     entry_points={  # Options: console_scripts gui_scripts
             'console_scripts': [
-                'ali-audio-to-srt=ali_audio_to_srt.__main__:main',
-                'AliAudioToSrt=ali_audio_to_srt.__main__:main',
-                '阿里云音频转字幕=ali_audio_to_srt.__main__:main',
-                '阿里云转字幕=ali_audio_to_srt.__main__:main'
+                'ali-audio-text-sync=ali_audio_text_sync.__main__:main',
+                'AliAudioTextSync=ali_audio_text_sync.__main__:main',
+                '阿里云自动打轴=ali_audio_text_sync.__main__:main'
             ]
     },
     
