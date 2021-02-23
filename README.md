@@ -14,7 +14,7 @@
 
 ## 📝 背景
 
-群成员提了这个要求，想着可以配合 [阿里云转字幕](https://gitee.com/haujet/ali-audio-text-sync) 改一下，所以做了这个命令行工具。
+群成员提了这个要求，想着可以配合 [阿里云转字幕](../../../ali-audio-to-srt) 改一下，所以做了这个命令行工具。
 
 使用后，会自动生成 `config.ini` 配置文件，请根据提示，在配置文件里填写上阿里云 API 相关参数。
 
@@ -76,7 +76,7 @@ pip install -r requirements.txt
 然后就可以以模块的方式运行：
 
 ```
-python -m ali_audio_to_srt
+python -m ali_audio_text_sync
 ```
 
 ## 💡 使用
@@ -84,21 +84,21 @@ python -m ali_audio_to_srt
 注意：识别的音频或视频文件时长不能超过 4 个半小时。
 
 ```
-python -m ali_audio_to_srt
-python -m ali_audio_to_srt 音频1.mp3 视频2.mkv
+python -m ali_audio_text_sync
+python -m ali_audio_text_sync 音频.mp3 文稿.txt
 ```
 
 第一种方式是直接运行，会有文字提示引导你：
 
 ```
-> python -m ali_audio_to_srt
+> python -m ali_audio_text_sync
 
 ```
 
 第二种方式是命令行传递参数运行：
 
 ```
-> python -m ali_audio_to_srt -h
+> python -m ali_audio_text_sync -h
 usage: __main__.py [-h] [--version] [-l 语言] Media Text
 
 功能：使用阿里云智能语音服务中的录音文件识别 API，实现将视频、音频文件转写，
