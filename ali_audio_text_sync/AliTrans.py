@@ -234,6 +234,8 @@ class AliTrans():
         字幕列表 = []
         文本_行_列表 = 文本.splitlines()
         结果_词 = self.任务详情['Result']['Words']
+        # pprint(结果_词)
+        # pprint(文本_行_列表)
         for i, 行 in enumerate(文本_行_列表):
             if not 行.replace(' ', ''):
                 continue
@@ -242,14 +244,18 @@ class AliTrans():
             结束时间 = 结果_词[0]['EndTime']
             for 词 in 结果_词.copy():
                 if 词['Word'] in 临时文字:
-                    结束时间 = 词['EndTime']
                     临时文字 = 临时文字.replace(词['Word'], '')
-                    print(词['Word'])
-                    print(结果_词)
-                    结果_词.remove({'Word': 词['Word'],
-                                 'EndTime': 词['EndTime'],
-                                 'BeginTime': 词['BeginTime'],
-                                 'ChannelId': 词['ChannelId']})
+                    词_索引 = 结果_词.index(词)
+                    if 词_索引 < 4:
+                        for j in range(词_索引 + 1):
+                            结果_词.pop(0)
+                    else:
+                        break
+                    结束时间 = 词['EndTime']
+                    # 结果_词.remove({'Word': 词['Word'],
+                    #              'EndTime': 词['EndTime'],
+                    #              'BeginTime': 词['BeginTime'],
+                    #              'ChannelId': 词['ChannelId']})
             字幕 = 将本句字幕添加到列表(行)
 
         return srt.compose(字幕列表, reindex=True, start_index=1, strict=True)
