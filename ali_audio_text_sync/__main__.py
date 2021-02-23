@@ -18,7 +18,6 @@ import platform
 import threading
 import time
 from pathlib import Path
-from icecream import ic
 from threading import Thread
 
 from .AliOss import AliOss
@@ -40,16 +39,22 @@ def main():
         print(f'''
 你没有输入任何文件，因此进入文字引导。
 程序的用处主要是使用阿里云的录音文件识别服务
-将视频或音频文件生成 SRT 字幕文件
+将音频识别成带时间戳的文本
+再根据此带时间戳的文本，为文稿打轴
+生成 srt 字幕
 ''')
         print(f'\n请输入要处理的视频或音频文件')
         sys.argv.append(得到输入文件())
+        
+        print(f'\n请输入其对应的文稿的文本文件')
+        sys.argv.append(得到输入文件())
 
     parser = argparse.ArgumentParser(
-        description='''功能：使用阿里云的录音文件识别服务将视频或音频文件生成 SRT 字幕文件''',
+        description='''功能：自动打轴''',
         formatter_class=argparse.ArgumentDefaultsHelpFormatter
     )
-    parser.add_argument('Media', nargs='+',  type=str, help='可一次识别多个文件')
+    parser.add_argument('Media', type=str, help='音视频文件')
+    parser.add_argument('Text', type=str, help='文稿文本文件')
 
     parser.add_argument('--version', action='version', version='%(prog)s 1.0')
     parser.add_argument('-l', '--language', metavar='语言', type=str, default='', help='使用什么引擎，默认是配置文件中的第一个')
@@ -75,7 +80,7 @@ def main():
 
     # if not any(list(引擎.items()))
 
-    处理文件(args.Media, 引擎=引擎)
+    处理文件(args.Media, args.Text, 引擎=引擎)
 
     if 不马上退出:
         input('\n所有任务处理完毕，按下回车结束程序')
@@ -121,64 +126,52 @@ def 得到输入文件():
             print('输入的文件不存在，请重新输入')
     return 输入文件
 
-def 处理文件(files, 引擎):
+def 处理文件(媒体文件, 文本文件, 引擎):
     删除oss文件 = True
-    线程列表 = []
-    线程数 = 16
-    files = list(filter(lambda x: os.path.exists(x), files))
-    for index, file in enumerate(files):
-        while len(threading.enumerate()) >= 线程数:
-            time.sleep(1)
-        print(f'\n总共有 {len(files)} 个文件需要识别，正在转码上传第 {index + 1} 个：{file}')
-        # 生成 wav
-        wav路径 = f'{os.path.splitext(file)[0]}_16000hz.wav'
-        命令 = f'ffmpeg -y -hide_banner -i "{file}" -ac 1 -ar 16000 "{wav路径}"'
-        subprocess.run(shlex.split(命令), stderr=subprocess.DEVNULL, stdout=subprocess.DEVNULL)
-        print(f'转码完成')
+    
+    if not os.path.exists(媒体文件):
+        print(f'文件不存在：{媒体文件}')
+        exit()
+    if not os.path.exists(文本文件):
+        print(f'文件不存在：{文本文件}')
+        exit()
+    
+    # 生成 wav
+    wav路径 = f'{os.path.splitext(媒体文件)[0]}_16000hz.wav'
+    命令 = f'ffmpeg -y -hide_banner -i "{媒体文件}" -ac 1 -ar 16000 "{wav路径}"'
+    subprocess.run(shlex.split(命令), stderr=subprocess.DEVNULL, stdout=subprocess.DEVNULL)
+    print(f'转码完成')
 
-        # oss 初始化
-        oss = 得到oss(ali_Oss_Bucket_Name            = 引擎['ali_Oss_Bucket_Name'],
-                    ali_Oss_Endpoint_Domain        = 引擎['ali_Oss_Endpoint_Domain'],
-                    ali_Oss_Access_Key_Id          = 引擎['ali_Oss_Access_Key_Id'],
-                    ali_Oss_Access_Key_Secret      = 引擎['ali_Oss_Access_Key_Secret'])
-        if not oss: return False
+    # oss 初始化
+    oss = 得到oss(ali_Oss_Bucket_Name            = 引擎['ali_Oss_Bucket_Name'],
+                ali_Oss_Endpoint_Domain        = 引擎['ali_Oss_Endpoint_Domain'],
+                ali_Oss_Access_Key_Id          = 引擎['ali_Oss_Access_Key_Id'],
+                ali_Oss_Access_Key_Secret      = 引擎['ali_Oss_Access_Key_Secret'])
+    if not oss: return False
 
-        # 上传 wav，得到 远程链接
-        oss文件路径, 文件url链接 = 上传oss(wav路径, oss)
-        print(f'上传完成，文件链接：{文件url链接}')
+    # 上传 wav，得到 远程链接
+    oss文件路径, 文件url链接 = 上传oss(wav路径, oss)
+    print(f'上传完成，文件链接：{文件url链接}')
 
-        # 删除本地 wav 文件
-        os.remove(wav路径)
+    # 删除本地 wav 文件
+    os.remove(wav路径)
 
-        # 初始化识别引擎
-        识别引擎 = AliTrans(appKey=引擎['ali_Api_App_Key'],
-                         language='',
-                         accessKeyId=引擎['ali_Api_Access_Key_Id'],
-                         accessKeySecret=引擎['ali_Api_Access_Key_Secret'])
+    # 初始化识别引擎
+    识别引擎 = AliTrans(appKey=引擎['ali_Api_App_Key'],
+                        language='',
+                        accessKeyId=引擎['ali_Api_Access_Key_Id'],
+                        accessKeySecret=引擎['ali_Api_Access_Key_Secret'])
 
-        # 提交任务
-        识别引擎.提交任务(文件url链接)
-        print(f'第 {index + 1} 个文件 {file} 识别任务已提交')
+    # 提交任务
+    识别引擎.提交任务(文件url链接)
 
-        # 用新线程等待识别完成
-        线程 = Wait_For_Response_To_Generate_Srt(file, 识别引擎, oss, oss文件路径, 文件url链接, 删除oss文件)
-        线程列表.append(线程)
-        线程.start()
+    # 用新线程等待识别完成
+    线程 = Wait_For_Response_To_Generate_Srt(
+        媒体文件, 文本文件, 识别引擎, oss, oss文件路径, 文件url链接, 删除oss文件)
+    线程.start()
+    线程.join()
 
-    # 定时检测线程列表的状态
-    print(f'\n所有任务线程已提交，等待识别完成')
-    有线程在工作 = True
-    lastTime = time.time()
-    while 有线程在工作:
-        thisTime = time.time()
-        if thisTime - lastTime > 5:
-            lastTime = thisTime
-            print(f'\n各线程状况：')
-            for index, 线程 in enumerate(线程列表):
-                print(f'    {index}: {线程.状态} （{线程.文件}）')
-                ...
-        if all(list(map(lambda x: not x.is_alive(), 线程列表))): 有线程在工作 = False
-        time.sleep(0.2)
+
 
 
 def 得到oss(ali_Oss_Bucket_Name,
@@ -215,9 +208,10 @@ def 上传oss(file, oss):
 
 
 class Wait_For_Response_To_Generate_Srt(Thread):
-    def __init__(self, 文件, 识别引擎, oss, oss文件路径, 文件url链接, 删除oss文件):
+    def __init__(self, 文件, 文本文件, 识别引擎, oss, oss文件路径, 文件url链接, 删除oss文件):
         super().__init__()
         self.文件 = 文件
+        self.文本文件 = 文本文件
         self.识别引擎 = 识别引擎
         self.oss = oss
         self.oss文件路径 = oss文件路径
@@ -240,6 +234,13 @@ class Wait_For_Response_To_Generate_Srt(Thread):
             else:
                 self.状态 = '转换完成'
                 break
+    def 得到文本内容(self):
+        try:
+            with open(self.文本文件, encoding='utf-8') as f:
+                return f.read()
+        except:
+            with open(self.文本文件, encoding='gbk') as f:
+                return f.read()
 
     def run(self):
         轮询成功 = self.轮询()
@@ -248,8 +249,7 @@ class Wait_For_Response_To_Generate_Srt(Thread):
         self.oss.delete(self.oss文件路径)
 
         任务详情 = self.识别引擎.任务详情
-        srt内容 = self.识别引擎.结果转srt()
-
+        srt内容 = self.识别引擎.用结果为文本打轴(self.得到文本内容())
 
         srt文件 = os.path.splitext(self.文件)[0] + '.srt'
         print(f'写入文件：{srt文件}')

@@ -13,7 +13,7 @@ from setuptools import setup
 # twine upload -u USERNAME -p PASSWORD "dist/audio-video-resync-0.5.0.tar.gz"
 
 setup(
-    name='ali-audio-to-srt',
+    name='ali-audio-text-sync',
     version='0.1.0',
     description='使用阿里云服务的录音文件识别，将音频识别为 srt 字幕',
     author='Haujet Zhao',

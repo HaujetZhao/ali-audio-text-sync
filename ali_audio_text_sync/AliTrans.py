@@ -207,3 +207,48 @@ class AliTrans():
         pprint(字幕内容列表)
 
         return srt.compose(字幕列表, reindex=True, start_index=1, strict=True)
+
+    def 用结果为文本打轴(self, 文本:str):
+        
+        def 将本句字幕添加到列表(本句字幕内容:str):
+            开始秒数 = 开始时间 // 1000
+            开始毫秒数 = 开始时间 % 1000 * 1000
+            结束秒数 = 结束时间 // 1000
+            结束毫秒数 = 结束时间 % 1000 * 1000
+
+            # 设定字幕起始时间
+            if 开始秒数 == 0:
+                srt开始时间 = datetime.timedelta(microseconds=开始毫秒数)
+            else:
+                srt开始时间 = datetime.timedelta(seconds=开始秒数, microseconds=开始毫秒数)
+
+            # 设定字幕终止时间
+            if 结束秒数 == 0:
+                srt结束时间 = datetime.timedelta(microseconds=结束毫秒数)
+            else:
+                srt结束时间 = datetime.timedelta(seconds=结束秒数, microseconds=结束毫秒数)
+
+            字幕列表.append(srt.Subtitle(index=i, start=srt开始时间,
+                                     end=srt结束时间, content=本句字幕内容))
+        字幕列表 = []
+        文本_行_列表 = 文本.splitlines()
+        结果_词 = self.任务详情['Result']['Words']
+        for i, 行 in enumerate(文本_行_列表):
+            临时文字 = 行
+            开始时间 = 结果_词[0]['BeginTime']
+            结束时间 = 结果_词[0]['EndTime']
+            for 词 in 结果_词.copy():
+                if 词['Word'] in 临时文字:
+                    结束时间 = 词['EndTime']
+                    临时文字 = 临时文字.replace(词['Word'], '')
+                    print(词['Word'])
+                    print(结果_词)
+                    结果_词.remove({'Word': 词['Word'],
+                                 'EndTime': 词['EndTime'],
+                                 'BeginTime': 词['BeginTime'],
+                                 'ChannelId': 词['ChannelId']})
+            字幕 = 将本句字幕添加到列表(行)
+        print(字幕列表)
+
+        return srt.compose(字幕列表, reindex=True, start_index=1, strict=True)
+    
