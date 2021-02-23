@@ -8,6 +8,7 @@ from aliyunsdkcore.client import AcsClient
 from aliyunsdkcore.request import CommonRequest
 
 from icecream import ic
+from zhconv import convert
 
 class AliTrans():
     def __init__(self, appKey, language, accessKeyId, accessKeySecret):
@@ -236,7 +237,7 @@ class AliTrans():
         for i, 行 in enumerate(文本_行_列表):
             if not 行.replace(' ', ''):
                 continue
-            临时文字 = 行
+            临时文字 = convert(行, 'zh-cn')
             开始时间 = 结果_词[0]['BeginTime']
             结束时间 = 结果_词[0]['EndTime']
             for 词 in 结果_词.copy():

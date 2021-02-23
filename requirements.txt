@@ -2,3 +2,4 @@ srt
 aliyun-python-sdk-core
 oss2
 icecream
+zhconv
