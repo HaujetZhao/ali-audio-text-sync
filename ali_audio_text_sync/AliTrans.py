@@ -234,6 +234,8 @@ class AliTrans():
         文本_行_列表 = 文本.splitlines()
         结果_词 = self.任务详情['Result']['Words']
         for i, 行 in enumerate(文本_行_列表):
+            if not 行.replace(' ', ''):
+                continue
             临时文字 = 行
             开始时间 = 结果_词[0]['BeginTime']
             结束时间 = 结果_词[0]['EndTime']
