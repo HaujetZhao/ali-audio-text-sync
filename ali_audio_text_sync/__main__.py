@@ -49,7 +49,8 @@ def main():
         print(f'\n请输入其对应的文稿的文本文件')
         sys.argv.append(得到输入文件())
 
-        print(f'\n可选的引擎有：')
+        print(f'\n所使用的配置文件路径：{配置文件}')
+        print(f'可选的引擎有：')
         for i, 引擎名 in enumerate(config.sections()):
             print(f'{i + 1}  {config.sections()[i]}')
         用户选择序号 = 得到整数('默认选择第一个引擎，如果有其它选择，请输入要选择的序号：',
