@@ -49,6 +49,19 @@ def main():
         print(f'\n请输入其对应的文稿的文本文件')
         sys.argv.append(得到输入文件())
 
+        print(f'\n可选的引擎有：')
+        for i, 引擎名 in enumerate(config.sections()):
+            print(f'{i + 1}  {config.sections()[i]}')
+        用户选择序号 = 得到整数('默认选择第一个引擎，如果有其它选择，请输入要选择的序号：',
+             1, 1, len(config.sections()))
+        引擎序号 = 用户选择序号 - 1
+        sys.argv.insert(1, f'{config.sections()[引擎序号]}')
+        sys.argv.insert(1, '-l')
+
+        print(sys.argv)
+
+
+
     parser = argparse.ArgumentParser(
         description='''功能：自动打轴''',
         formatter_class=argparse.ArgumentDefaultsHelpFormatter
@@ -125,6 +138,22 @@ def 得到输入文件():
         else:
             print('输入的文件不存在，请重新输入')
     return 输入文件
+
+def 得到整数(提示语, 默认值: int, 最小值: int, 最大值: int):
+    while True:
+        数值 = input(提示语 + f'\n    (默认值：{默认值}   有效数值：{最小值} ~ {最大值})\n')
+        if 数值 == '':
+            return 默认值
+        try:
+            数值 = int(数值)
+        except:
+            print('您的输入不是有效数字，请重新输入')
+            continue
+        if 数值 < 最小值 or 数值 > 最大值:
+            print('您输入的值不在有效范围内，请重新输入')
+            continue
+        break
+    return 数值
 
 def 处理文件(媒体文件, 文本文件, 引擎):
     删除oss文件 = True
