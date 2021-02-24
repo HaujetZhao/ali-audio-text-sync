@@ -237,13 +237,13 @@ class AliTrans():
         for i, 行 in enumerate(文本_行_列表):
             if not 行.replace(' ', ''):
                 continue
-            临时文字 = convert(行, 'zh-cn')
+            临时文字 = convert(行, 'zh-cn').lower()
             开始时间 = 结果_词[0]['BeginTime']
             # if 开始时间 > 上个结束时间:
             #     开始时间 = 上个结束时间
             结束时间 = 结果_词[0]['EndTime']
             for 词 in 结果_词.copy():
-                if 词['Word'] in 临时文字:
+                if 词['Word'].lower() in 临时文字:
                     临时文字 = 临时文字.replace(词['Word'], '')
                     词_索引 = 结果_词.index(词)
                     if 临时文字 == convert(行, 'zh-cn') or 词_索引 < 4:
