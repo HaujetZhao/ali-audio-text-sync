@@ -239,6 +239,8 @@ class AliTrans():
                 continue
             临时文字 = convert(行, 'zh-cn')
             开始时间 = 结果_词[0]['BeginTime']
+            # if 开始时间 > 上个结束时间:
+            #     开始时间 = 上个结束时间
             结束时间 = 结果_词[0]['EndTime']
             for 词 in 结果_词.copy():
                 if 词['Word'] in 临时文字:
@@ -250,6 +252,10 @@ class AliTrans():
                     else:
                         break
                     结束时间 = 词['EndTime']
+                    if 结果_词:
+                        下个开始时间 = 结果_词[0]['BeginTime']
+                        if 结束时间 > 下个开始时间:
+                            结束时间 = 下个开始时间
             字幕 = 将本句字幕添加到列表(行)
 
         return srt.compose(字幕列表, reindex=True, start_index=1, strict=True)
