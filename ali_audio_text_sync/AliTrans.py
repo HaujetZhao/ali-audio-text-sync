@@ -246,7 +246,7 @@ class AliTrans():
                 if 词['Word'].lower() in 临时文字:
                     临时文字 = 临时文字.replace(词['Word'], '')
                     词_索引 = 结果_词.index(词)
-                    if 临时文字 == convert(行, 'zh-cn') or 词_索引 < 4:
+                    if 临时文字 == convert(行, 'zh-cn') or 词_索引 < 8:
                         for j in range(词_索引 + 1):
                             结果_词.pop(0)
                     else:
